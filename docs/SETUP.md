@@ -2,15 +2,23 @@
 
 ## 1. Supabase projekt
 
-1. Hozz létre egy új projektet a [supabase.com](https://supabase.com)-on.
+1. Hozz létre egy új projektet a [supabase.com](https://supabase.com)-on
+   (válaszd az EU régiót GDPR miatt).
 2. SQL editorben futtasd le sorban a `supabase/migrations/` mappa fájljait:
    - `20260528000001_init_schema.sql`
    - `20260528000002_map_matching.sql`
    - `20260528000003_streets_in_bbox.sql`
+   - `20260528000004_account_deletion.sql`
+   - `20260528000005_retention.sql`
 3. Settings → API alól másold ki:
    - `Project URL` → ez lesz a `SUPABASE_URL`
    - `anon public` kulcs → ez kell a mobil appnak
    - `service_role` kulcs → ez kell az import scriptnek (titok, ne commitold)
+4. Authentication → Email Templates: állítsd át a magic link sablont
+   magyar nyelvre, és állítsd be a `Site URL`-t a deep link sémára
+   (`walkwithme://auth`).
+5. Authentication → Rate Limits: max 4 magic link / óra / IP (alapból már
+   szigorú, de érdemes ellenőrizni).
 
 ## 2. Budapest adatainak importálása
 
@@ -36,10 +44,17 @@ Az import ~5-10 percig tart. Eredmény:
 ```bash
 cd app
 npm install
+cp .env.example .env
+# töltsd ki az EXPO_PUBLIC_* változókat a .env-ben
 ```
 
-Töltsd ki az `app.json` `extra` mezőit a Supabase URL és anon kulccsal,
-valamint az Android Google Maps API kulccsal.
+Az `app.config.ts` `extra` mezője `EXPO_PUBLIC_*` env változókat olvas;
+a `.env` gitignore-olt, így a kulcsok nem kerülnek a repóba.
+
+A Google Maps Android kulcsot mindenképp **restrict-eld** a GCP konzolon:
+- Application restrictions: Android apps
+- Package name: `com.lakydavid.walkwithme`
+- SHA-1: a release-keystore SHA-1 fingerprint-je
 
 Indítás:
 

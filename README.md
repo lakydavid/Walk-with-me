@@ -20,7 +20,12 @@ walk-with-me/
 ├── app/                 # Expo React Native mobilapp
 ├── supabase/            # Adatbázis migrációk, RPC függvények, edge functions
 ├── scripts/             # OSM import és egyéb data-pipeline scriptek
-└── docs/                # Architektúra dokumentáció
+└── docs/
+    ├── SETUP.md         # Telepítés
+    ├── ARCHITECTURE.md  # Adatfolyam, map matching
+    ├── EDGE_CASES.md    # Edge case-ek + döntések
+    ├── PLAY_STORE.md    # Play Store submission checklist
+    └── privacy/         # Privacy Policy (HU + EN)
 ```
 
 ## Adatmodell (vázlat)
@@ -39,16 +44,28 @@ walk-with-me/
 - [x] Expo app skeleton
 
 ### Fázis 2 — Core MVP
-- [ ] Supabase auth (email + magic link)
-- [ ] Térképnézet: utcák színezve státusz szerint (szürke / sárga / zöld)
-- [ ] Háttér GPS tracking (Expo Location)
-- [ ] Map matching RPC: GPS-pontok → utcaszegmensek, hossz-frissítés, 75% küszöb
-- [ ] Kerület-progress nézet
+- [x] Supabase auth (email + magic link)
+- [x] Térképnézet: utcák színezve státusz szerint (szürke / sárga / zöld)
+- [x] Háttér GPS tracking (Expo Location)
+- [x] Map matching RPC: GPS-pontok → utcaszegmensek, hossz-frissítés, 75% küszöb
+- [x] Kerület-progress nézet
 
-### Fázis 3 — Polish
+### Fázis 3 — Play Store readiness (jelen branch)
+- [x] Privacy consent screen (prominent disclosure)
+- [x] In-app account deletion (kötelező Play Store policy)
+- [x] Anti-cheat: mock GPS reject + 12 km/h sebesség-cap
+- [x] Idempotens batch ingest + per-user rate limit
+- [x] Input validáció + size cap a `ingest_walk` RPC-ben
+- [x] RLS auditálva: user_street_progress csak SECURITY DEFINER-en át írható
+- [x] Anon kulcs + GMaps kulcs `EXPO_PUBLIC_*` env-be, gitignore-olva
+- [x] 90 napos retention a nyers walk_sessions-re
+- [x] Magyar + angol privacy policy sablon
+
+### Fázis 4 — Polish
 - [ ] Achievement értesítések (kerület 100%-ra teljesítve)
 - [ ] Statisztikák: összes lépett km, teljesített kerületek
 - [ ] Streak-ek / napi célok
+- [ ] In-app data export ("Letöltöm az adataim" GDPR-ready)
 - [ ] Social: barátok progressje
 
 ## Setup

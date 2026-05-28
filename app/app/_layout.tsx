@@ -33,7 +33,13 @@ export default function RootLayout() {
       <StatusBar style="auto" />
       <Stack screenOptions={{ headerShown: false }}>
         {session ? (
-          <Stack.Screen name="(tabs)" />
+          <>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen
+              name="consent"
+              options={{ presentation: "modal", headerShown: true, title: "Adatvédelem" }}
+            />
+          </>
         ) : (
           <Stack.Screen name="sign-in" />
         )}

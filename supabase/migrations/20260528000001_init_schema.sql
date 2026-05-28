@@ -71,12 +71,11 @@ create table user_street_progress (
   street_id         bigint not null references streets(id) on delete cascade,
   walked_geom       geometry(MultiLineString, 4326) not null,
   walked_length_m   double precision not null,
-  coverage_ratio    double precision generated always as (
-    case
-      when walked_length_m is null then 0
-      else least(1.0, walked_length_m / nullif((select length_m from streets s where s.id = street_id), 0))
-    end
-  ) stored,
+  -- Cached and kept in sync by ingest_walk(). PostgreSQL won't allow a
+  -- STORED generated column to reference another table, so we update it
+  -- inside the RPC.
+  coverage_ratio    double precision not null default 0
+                    check (coverage_ratio between 0 and 1),
   completed         boolean not null default false,
   first_walked_at   timestamptz not null default now(),
   completed_at      timestamptz,
@@ -86,6 +85,36 @@ create table user_street_progress (
 
 create index usp_user_idx on user_street_progress(user_id);
 create index usp_completed_idx on user_street_progress(user_id, completed);
+
+-- ---------------------------------------------------------------------------
+-- BATCH IDEMPOTENCY
+-- ---------------------------------------------------------------------------
+-- Each ingest_walk call carries a client-generated batch_id. We record
+-- processed batches so retries (after network errors) are no-ops instead of
+-- double-counting walked length. Rows are auto-purged after 7 days.
+
+create table ingest_batches (
+  batch_id    uuid primary key,
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  session_id  uuid not null,
+  created_at  timestamptz not null default now()
+);
+
+create index ingest_batches_user_idx on ingest_batches(user_id, created_at desc);
+
+-- ---------------------------------------------------------------------------
+-- RATE LIMITING
+-- ---------------------------------------------------------------------------
+-- Lightweight counter used by ingest_walk to throttle abuse. We allow up to
+-- 60 calls per user per minute (a normal client flushes every 30s).
+
+create table rpc_calls (
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  rpc_name    text not null,
+  called_at   timestamptz not null default now()
+);
+
+create index rpc_calls_user_idx on rpc_calls(user_id, rpc_name, called_at desc);
 
 -- ---------------------------------------------------------------------------
 -- RAW GPS TRACKS
@@ -113,20 +142,29 @@ create index ws_path_idx on walk_sessions using gist(path);
 -- ---------------------------------------------------------------------------
 -- Reference data (areas, streets) is public-read. User progress is per-user.
 
-alter table areas              enable row level security;
-alter table streets            enable row level security;
+alter table areas                enable row level security;
+alter table streets              enable row level security;
 alter table user_street_progress enable row level security;
-alter table walk_sessions      enable row level security;
+alter table walk_sessions        enable row level security;
+alter table ingest_batches       enable row level security;
+alter table rpc_calls            enable row level security;
 
 create policy areas_read   on areas   for select using (true);
 create policy streets_read on streets for select using (true);
 
 create policy usp_owner_select on user_street_progress
   for select using (auth.uid() = user_id);
-create policy usp_owner_modify on user_street_progress
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+-- Writes happen only via the ingest_walk RPC (SECURITY DEFINER), so we do
+-- NOT grant table-level write access to authenticated users. A direct INSERT
+-- from a client would let an attacker mark any street completed.
+create policy usp_owner_delete on user_street_progress
+  for delete using (auth.uid() = user_id);
 
 create policy ws_owner_select on walk_sessions
   for select using (auth.uid() = user_id);
-create policy ws_owner_modify on walk_sessions
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy ws_owner_delete on walk_sessions
+  for delete using (auth.uid() = user_id);
+
+-- ingest_batches and rpc_calls are never accessed directly by clients; they
+-- are written exclusively by SECURITY DEFINER functions. We leave RLS on
+-- with no policies, which denies all client access.

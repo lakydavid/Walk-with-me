@@ -30,7 +30,8 @@ app/*.orig.*
 .env.local
 .env.*.local
 app/.env
-app/.env.local
+app/.env.*
+!app/.env.example
 
 # Logs
 npm-debug.*

@@ -7,9 +7,9 @@ const extra = Constants.expoConfig?.extra ?? {};
 const url = extra.supabaseUrl as string;
 const anonKey = extra.supabaseAnonKey as string;
 
-if (!url || !anonKey || url.startsWith("REPLACE_")) {
+if (!url || !anonKey) {
   console.warn(
-    "Supabase nincs konfigurálva. Töltsd ki az app.json extra.supabaseUrl / supabaseAnonKey mezőit.",
+    "Supabase nincs konfigurálva. Töltsd ki az app/.env-ben az EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY változókat.",
   );
 }
 

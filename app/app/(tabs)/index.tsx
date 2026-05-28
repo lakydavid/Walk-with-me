@@ -1,7 +1,9 @@
+import { router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Polyline, PROVIDER_DEFAULT, Region } from "react-native-maps";
+import { hasTrackingConsent } from "@/lib/consent";
 import { fetchStreetsInBbox, type StreetFeature } from "@/lib/streets";
 import { isTracking, startTracking, stopTracking } from "@/lib/tracking";
 
@@ -52,10 +54,16 @@ export default function MapScreen() {
       if (tracking) {
         await stopTracking();
         setTracking(false);
-      } else {
-        await startTracking();
-        setTracking(true);
+        return;
       }
+      // Prominent disclosure must precede the OS background-location prompt
+      // (Play Store policy). Route to consent if we haven't recorded it yet.
+      if (!(await hasTrackingConsent())) {
+        router.push("/consent");
+        return;
+      }
+      await startTracking();
+      setTracking(true);
     } catch (e) {
       Alert.alert("Tracking hiba", (e as Error).message);
     }
