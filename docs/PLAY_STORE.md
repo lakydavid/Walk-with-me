@@ -21,11 +21,17 @@ esik. A lista alapja a 2024-25-ös Play Console policy (Location Permissions
 
 ## Pre-submission action items
 
-### Privacy policy
-- [ ] A `docs/privacy/privacy-en.md` és `privacy-hu.md` tartalmát publikus
-      URL-re hosztolni (pl. GitHub Pages: `lakydavid.github.io/Walk-with-me/privacy`)
-- [ ] Az URL bekerül a Play Console "Privacy policy" mezőjébe ÉS a
-      `EXPO_PUBLIC_PRIVACY_POLICY_URL` env-be
+### Privacy policy hostolása
+1. GitHub → Walk-with-me repo → **Settings → Pages**
+2. Source: **Deploy from a branch**
+3. Branch: `main` (vagy amelyik a publikus), folder: **`/docs`**
+4. Mentés. Pár perc múlva az alábbi URL-eken lesz elérhető:
+   - `https://lakydavid.github.io/Walk-with-me/` — index
+   - `https://lakydavid.github.io/Walk-with-me/privacy` — magyar
+   - `https://lakydavid.github.io/Walk-with-me/privacy-en` — angol
+- [ ] Ellenőrizd hogy mindhárom betölt
+- [ ] A magyar URL bekerül a Play Console "Privacy policy" mezőjébe ÉS
+      `EXPO_PUBLIC_PRIVACY_POLICY_URL`-be (`.env` és EAS secret)
 
 ### Play Console — Data safety form
 Be kell jelölni:

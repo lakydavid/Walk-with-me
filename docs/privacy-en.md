@@ -1,5 +1,7 @@
 # Privacy Policy
 
+[🇭🇺 Magyar](./privacy) · [🇬🇧 English](./privacy-en)
+
 **Effective: 28 May 2026** &nbsp;·&nbsp; **Controller:** Dávid Laky (`lktsdvd@gmail.com`)
 
 This document explains how the Walk With Me mobile app ("the Service") handles

@@ -1,0 +1,15 @@
+title: Walk With Me
+description: Sétálj végig minden utcán Budapesten — minden utca egy achievement.
+
+# Jekyll-based default GitHub Pages site. Source = the docs/ folder of the
+# Walk-with-me repo. URLs of the form lakydavid.github.io/Walk-with-me/<page>
+# resolve to docs/<page>.md served as HTML.
+
+theme: jekyll-theme-minimal
+
+# Exclude internal-only docs that aren't meant to be public web pages.
+exclude:
+  - SETUP.md
+  - PLAY_STORE.md
+  - EDGE_CASES.md
+  - ARCHITECTURE.md

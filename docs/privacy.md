@@ -1,5 +1,7 @@
 # Adatkezelési tájékoztató
 
+[🇭🇺 Magyar](./privacy) · [🇬🇧 English](./privacy-en)
+
 **Hatályos: 2026. május 28.** &nbsp;·&nbsp; **Adatkezelő:** Laky Dávid (`lktsdvd@gmail.com`)
 
 A Walk With Me mobilapplikáció ("Szolgáltatás") által gyűjtött személyes
