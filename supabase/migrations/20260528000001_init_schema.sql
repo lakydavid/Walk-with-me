@@ -2,6 +2,7 @@
 -- Requires PostGIS for geometry and spatial queries.
 
 create extension if not exists postgis;
+create extension if not exists pg_trgm;
 
 -- ---------------------------------------------------------------------------
 -- AREAS
@@ -55,9 +56,6 @@ create table streets (
 create index streets_area_idx on streets(area_id);
 create index streets_geom_idx on streets using gist(geom);
 create index streets_name_trgm_idx on streets using gin (name gin_trgm_ops);
-
--- Trigram index needs the extension.
-create extension if not exists pg_trgm;
 
 -- ---------------------------------------------------------------------------
 -- USER PROGRESS
