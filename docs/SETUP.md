@@ -22,6 +22,27 @@
 
 ## 2. Budapest adatainak importálása
 
+Két út van. Az **A** opció böngésző-only (semmi helyi telepítés) — ezt
+ajánljuk. A **B** opció a Node importer, ha frissíteni akarod az OSM
+adatokat.
+
+### A) Előgenerált SQL seed (ajánlott)
+
+A `supabase/seed/` mappa kész SQL fájlokat tartalmaz a 2026-05-31-i OSM
+adatokból (Budapest + 23 kerület + 32 821 nevesített járható utca). Futtasd
+őket az SQL Editorban **sorrendben**, mint a migrációkat:
+
+1. `00_areas.sql` — város + 23 kerület határai
+2. `01_streets.sql` … `09_streets.sql` — utcaszegmensek (~4000/fájl)
+3. `99_postprocess.sql` — hossz-számítás, kerület-hozzárendelés, aggregátumok
+
+A `99_postprocess.sql` a végén kiír egy ellenőrző táblát: kerületenként az
+utcák száma és összhossza km-ben. Ha ezt látod, az import kész.
+
+> A street fájlok ~700 KB-osak; a beillesztés után a "Run" pár másodperc.
+
+### B) Node importer (OSM frissítéshez)
+
 ```bash
 cd scripts
 npm install
@@ -30,14 +51,12 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ... \
   npm run import:budapest
 ```
 
-Az import ~5-10 percig tart. Eredmény:
-- 1 város (Budapest)
-- 23 kerület
-- ~30-50 ezer nevesített utcaszegmens
+A seed fájlok újragenerálásához (friss OSM adatból):
 
-> **Megjegyzés:** Az `import-budapest.ts` egy `sql_exec` RPC-re hivatkozik a
-> hossz- és kerület-újraszámoláshoz. Ezt biztonsági okokból nem hoztuk létre
-> alapból; futtasd a script végén megjelenő SQL-t a Supabase SQL editorban.
+```bash
+# 1. Overpass lekérések /tmp-be (lásd scripts/generate-seed.cjs fejlécét)
+# 2. node scripts/generate-seed.cjs supabase/seed
+```
 
 ## 3. Mobil app
 
