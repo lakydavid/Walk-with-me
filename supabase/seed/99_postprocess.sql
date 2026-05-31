@@ -14,6 +14,18 @@ from areas a
 where a.kind = 'district'
   and ST_Contains(a.geom, ST_LineInterpolatePoint(s.geom, 0.5));
 
+-- Fallback: streets whose midpoint landed on a border (still attached to the
+-- city) go to the geometrically nearest district.
+update streets s
+set area_id = nearest.id
+from lateral (
+  select a.id from areas a
+  where a.kind = 'district'
+  order by a.geom <-> ST_LineInterpolatePoint(s.geom, 0.5)
+  limit 1
+) as nearest
+where s.area_id = (select id from areas where kind = 'city');
+
 update areas a
 set street_count = sub.cnt,
     total_street_length_m = sub.tot
