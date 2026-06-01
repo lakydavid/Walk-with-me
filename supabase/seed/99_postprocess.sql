@@ -36,6 +36,14 @@ from (
 ) sub
 where sub.area_id = a.id;
 
+-- Zero out areas that no longer have any streets pointing to them
+-- (e.g. the city row, once the orphan reassignment moved all its streets
+-- to districts). The aggregate update above only touches rows that ARE in
+-- the GROUP BY result, so a "drained" area would keep its stale count.
+update areas
+set street_count = 0, total_street_length_m = 0
+where id not in (select distinct area_id from streets where area_id is not null);
+
 commit;
 
 -- Sanity check:

@@ -27,6 +27,13 @@ from (
 ) sub
 where sub.area_id = a.id;
 
+-- Reset cached counts on areas that no longer have any streets (e.g. the
+-- city row after the orphan reassignment), since the GROUP BY update above
+-- only touches rows that are present in the aggregate result.
+update areas
+set street_count = 0, total_street_length_m = 0
+where id not in (select distinct area_id from streets where area_id is not null);
+
 commit;
 
 -- Verify: should now be 0.
