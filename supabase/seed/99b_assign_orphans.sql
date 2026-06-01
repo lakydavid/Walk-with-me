@@ -9,14 +9,13 @@
 begin;
 
 update streets s
-set area_id = nearest.id
-from lateral (
+set area_id = (
   select a.id
   from areas a
   where a.kind = 'district'
   order by a.geom <-> ST_LineInterpolatePoint(s.geom, 0.5)
   limit 1
-) as nearest
+)
 where s.area_id = (select id from areas where kind = 'city');
 
 update areas a
